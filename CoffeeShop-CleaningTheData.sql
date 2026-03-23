@@ -5,7 +5,6 @@ LIMIT 3;
 --Check datatypes
 DESCRIBE `workspace`.`dbo`.`coffee`;
 
-
 --Check price range
 SELECT MAX(unit_price)
 FROM dbo.coffee;
