@@ -4,6 +4,25 @@ LIMIT 3;
 
 --Check datatypes
 DESCRIBE `workspace`.`dbo`.`coffee`;
+
+--Check price range
+SELECT MAX(unit_price)
+FROM dbo.coffee;
+
+SELECT MIN(unit_price)
+FROM dbo.coffee;
+
+--get the total sales for the whole perios jan-June
+select SUM(unit_price*transaction_qty)
+FROM dbo.coffee;
+
+--Check quantity range
+SELECT MAX(transaction_qty)
+FROM dbo.coffee;
+
+SELECT MIN(transaction_qty)
+FROM dbo.coffee;
+
 --============================CLEANING THE DATA================================
 
 --1. Check total rows
@@ -32,7 +51,7 @@ SUM(CASE WHEN product_detail IS NULL THEN 1 else 0 END) AS prod_details
 FROM dbo.coffee;
 --conclusion-there are no null values
 
--- 3. Check for duplicates
+-- 3. Check for duplicate transcations
 SELECT transaction_id, count(*) as numofDuplicatse
 FROM dbo.coffee
 GROUP BY transaction_id
@@ -65,10 +84,6 @@ FROM dbo.coffee;
 SELECT DISTINCT product_detail
 FROM dbo.coffee;
 
---Conclusion- All categorical colummns are standardised. 
-
-
-
 SELECT COUNT (DISTINCT product_type) AS product_type
 FROM dbo.coffee;
 
@@ -76,14 +91,15 @@ FROM dbo.coffee;
 SELECT DISTINCT product_type
 FROM dbo.coffee;
 
+
 --Conclusion- All categorical colummns are standardised. 
 
---Next Step: Create new columns that will assist us in our analysis, the store opens at 6am and closes at 9pm
+--Next Step: Transformation: Create new columns that will assist us in our analysis, the store opens at 6am and closes at 9pm
 
 SELECT
     transaction_id,
-    DATE_FORMAT(TO_DATE(transaction_date, 'yyyy/MM/dd'), 'dd MMMM yyyy')  AS transaction_date,
-    DATE_FORMAT(TO_TIMESTAMP(transaction_time, 'HH:mm:ss'), 'hh:mm:ss a') AS transaction_time,
+    DATE_FORMAT(TO_DATE(transaction_date, 'yyyy/MM/dd'), 'dd MMMM yyyy')    AS transaction_date,
+    DATE_FORMAT(TO_TIMESTAMP(transaction_time, 'HH:mm:ss'), 'hh:mm:ss a')   AS transaction_time,
     transaction_qty,
     store_id,
     store_location,
@@ -92,16 +108,24 @@ SELECT
     product_category,
     product_type,
     product_detail,
-    ROUND(unit_price * transaction_qty, 2)                                AS total_sales,
-    MONTH(TO_DATE(transaction_date, 'yyyy/MM/dd'))                        AS month,
-    DATE_FORMAT(TO_DATE(transaction_date, 'yyyy/MM/dd'), 'MMM')           AS month_name,
-    DATE_FORMAT(TO_DATE(transaction_date, 'yyyy/MM/dd'), 'EEEE')          AS day_of_week,
+    ROUND(unit_price * transaction_qty, 2)                                   AS total_sales,
+    MONTH(TO_DATE(transaction_date, 'yyyy/MM/dd'))                           AS month,
+    DATE_FORMAT(TO_DATE(transaction_date, 'yyyy/MM/dd'), 'MMM')              AS month_name,
+    DATE_FORMAT(TO_DATE(transaction_date, 'yyyy/MM/dd'), 'EEEE')             AS day_of_week,
     CASE
         WHEN HOUR(TO_TIMESTAMP(transaction_time, 'HH:mm:ss')) BETWEEN 6  AND 11 THEN 'Morning'
         WHEN HOUR(TO_TIMESTAMP(transaction_time, 'HH:mm:ss')) BETWEEN 12 AND 16 THEN 'Afternoon'
         WHEN HOUR(TO_TIMESTAMP(transaction_time, 'HH:mm:ss')) BETWEEN 17 AND 20 THEN 'Evening'
         ELSE 'Night'
-    END AS time_of_day
-FROM `workspace`.`dbo`.`coffee`;
+    END   AS time_of_day
+FROM `workspace`.`dbo`.`coffee`
+
+
+
+
+
+
+
+
 
 
