@@ -80,12 +80,10 @@ FROM dbo.coffee;
 
 --Next Step: Create new columns that will assist us in our analysis, the store opens at 6am and closes at 9pm
 
-/*
-
 SELECT
     transaction_id,
-    TO_DATE(transaction_date, 'yyyy/MM/dd')    AS transaction_date,
-    transaction_time,
+    DATE_FORMAT(TO_DATE(transaction_date, 'yyyy/MM/dd'), 'dd MMMM yyyy')  AS transaction_date,
+    DATE_FORMAT(TO_TIMESTAMP(transaction_time, 'HH:mm:ss'), 'hh:mm:ss a') AS transaction_time,
     transaction_qty,
     store_id,
     store_location,
@@ -94,18 +92,17 @@ SELECT
     product_category,
     product_type,
     product_detail,
-    ROUND(unit_price * transaction_qty, 2)      AS total_sales,
-    HOUR(TO_TIMESTAMP(transaction_time, 'HH:mm:ss'))  AS hour,
-    MONTH(TO_DATE(transaction_date, 'yyyy/MM/dd'))     AS month,
-    DATE_FORMAT(TO_DATE(transaction_date, 'yyyy/MM/dd'), 'MMM')  AS month_name,
-    DATE_FORMAT(TO_DATE(transaction_date, 'yyyy/MM/dd'), 'EEEE') AS day_of_week,
+    ROUND(unit_price * transaction_qty, 2)                                AS total_sales,
+    MONTH(TO_DATE(transaction_date, 'yyyy/MM/dd'))                        AS month,
+    DATE_FORMAT(TO_DATE(transaction_date, 'yyyy/MM/dd'), 'MMM')           AS month_name,
+    DATE_FORMAT(TO_DATE(transaction_date, 'yyyy/MM/dd'), 'EEEE')          AS day_of_week,
     CASE
         WHEN HOUR(TO_TIMESTAMP(transaction_time, 'HH:mm:ss')) BETWEEN 6  AND 11 THEN 'Morning'
         WHEN HOUR(TO_TIMESTAMP(transaction_time, 'HH:mm:ss')) BETWEEN 12 AND 16 THEN 'Afternoon'
         WHEN HOUR(TO_TIMESTAMP(transaction_time, 'HH:mm:ss')) BETWEEN 17 AND 20 THEN 'Evening'
         ELSE 'Night'
     END AS time_of_day
-FROM `workspace`.`dbo`.`coffee`
+FROM `workspace`.`dbo`.`coffee`;
 
 
 */
