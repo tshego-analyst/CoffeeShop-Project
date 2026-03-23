@@ -23,6 +23,12 @@ FROM dbo.coffee;
 SELECT MIN(transaction_qty)
 FROM dbo.coffee;
 
+--Check transaction date range
+SELECT
+    MIN(TO_DATE(transaction_date, 'yyyy/MM/dd')) AS first_transaction_date,
+    MAX(TO_DATE(transaction_date, 'yyyy/MM/dd')) AS last_transaction_date
+FROM `workspace`.`dbo`.`coffee`;
+
 --============================CLEANING THE DATA================================
 
 --1. Check total rows
@@ -90,6 +96,7 @@ FROM dbo.coffee;
 --Get the different product details
 SELECT DISTINCT product_type
 FROM dbo.coffee;
+
 
 --Conclusion- All categorical colummns are standardised. 
 
