@@ -62,47 +62,76 @@ Before cleaning, the following checks were performed:
 | Quantity range | 1 – 8 units |
 
 
-## Data Cleaning & Transformation
+## Data Transformation
 The following transformations were applied in Databricks SQL:
 
-**1. Fixed date format**
-Converted `transaction_date` from raw text to a readable date format `dd MMMM yyyy`.
-
-**2. Fixed time format**
-Converted `transaction_time` to 12-hour format with AM/PM.
-
-**3. Created `total_sales`**
+**1. Created `total_revenue`**
 ```sql
-ROUND(unit_price * transaction_qty, 2) AS total_sales
+ROUND(SUM(transaction_qty * unit_price), 2) AS total_revenue,
 ```
 
-**4. Extracted `month` and `month_name`**
+**2. Extracted `month` and `month_name`**
 ```sql
-MONTH(TO_DATE(transaction_date, 'yyyy/MM/dd')) AS month,
-DATE_FORMAT(TO_DATE(transaction_date, 'yyyy/MM/dd'), 'MMM') AS month_name
+ MONTHNAME(transaction_date)             AS month_name,
+ MONTH(transaction_date)                 AS month_number,
 ```
 
 **5. Extracted `day_of_week`**
 ```sql
-DATE_FORMAT(TO_DATE(transaction_date, 'yyyy/MM/dd'), 'EEEE') AS day_of_week
+DAYNAME(transaction_date)   AS day_name,
 ```
 
 **6. Created `time_of_day` buckets**
 ```sql
-CASE
-    WHEN HOUR(TO_TIMESTAMP(transaction_time, 'HH:mm:ss')) BETWEEN 6  AND 11 THEN 'Morning'
-    WHEN HOUR(TO_TIMESTAMP(transaction_time, 'HH:mm:ss')) BETWEEN 12 AND 16 THEN 'Afternoon'
-    WHEN HOUR(TO_TIMESTAMP(transaction_time, 'HH:mm:ss')) BETWEEN 17 AND 20 THEN 'Evening'
-    ELSE 'Night'
-END AS time_of_day
+ HOUR(transaction_time)                  AS hour_of_day,
+    CASE 
+    WHEN  hour_of_day BETWEEN 6 AND 11 THEN 'MORNING'
+    WHEN  hour_of_day BETWEEN 12 AND 16 THEN 'AFTERNOON'
+    WHEN  hour_of_day BETWEEN 17 AND 20 THEN 'EVENING'
+    ELSE 'off_peak'
+    END AS time_of_day,
 ```
 
 ---
 
 ## Key Findings
-*To be updated after analysis is complete.*
+
+| # | Question | Answer |
+|---|---|---|
+| 1 | Top revenue product | Sustainably Grown Organic Lg |
+| 2 | Busiest time of day | 10am — Morning |
+| 3 | Best performing store | Hell's Kitchen — R236,511 total revenue |
+| 4 | Best revenue month | June — R166,485 |
+| 5 | Top product category | Coffee — R269,952 |
+| 6 | Busiest day of week | Monday — R101,677 |
+| 7 | Average order value | R4.69 per transaction |
+| 8 | Top product by volume | Earl Grey Rg — 4,708 units sold |
 
 ---
+
+### Store Comparison
+
+| Store | Revenue | Items Sold | Transactions |
+|---|---|---|---|
+| Hell's Kitchen | R236,511 | 71,737 | 50,735 |
+| Astoria | R232,243 | 70,991 | 50,599 |
+| Lower Manhattan | R230,057 | 71,742 | 47,782 |
+
+> All 3 stores perform consistently. Lower Manhattan customers buy more items per visit but cheaper products, resulting in slightly lower revenue despite similar volume.
+
+### Monthly Revenue Trend
+
+| Month | Revenue |
+|---|---|
+| February | R76,145 |
+| January | R81,677 |
+| March | R98,834 |
+| April | R118,941 |
+| May | R156,727 |
+| June | R166,485 |
+
+> Revenue grew consistently every month, nearly doubling from February to June. April–June is the peak season.
+
 
 ## Dashboard
 * Microsoft Excel dashboard to be added after visualisation step is complete.*
