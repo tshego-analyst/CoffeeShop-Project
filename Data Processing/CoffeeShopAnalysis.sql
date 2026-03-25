@@ -208,7 +208,70 @@ GROUP BY product_detail
 ORDER BY items_sold DESC
 LIMIT 10;
 
+
+
+--I want to calssify the spend range, howeverm I frist need to explore my data before I make a decision
+
+--  What is the spend range per transaction?
+SELECT 
+    MIN(transaction_qty * unit_price) AS min_spend,
+    MAX(transaction_qty * unit_price) AS max_spend,
+    AVG(transaction_qty * unit_price) AS avg_spend
+ FROM workspace.dbo.coffee;
+
+--What is that $360 transaction?
+SELECT 
+    product_detail,
+    product_category,
+    transaction_qty,
+    unit_price,
+    (transaction_qty * unit_price) AS spend
+FROM workspace.dbo.coffee
+WHERE (transaction_qty * unit_price) = 360
+LIMIT 5;
+
+--What are the most expenstive transactioons and how often do they happen
+SELECT 
+    (transaction_qty * unit_price) AS spend,
+    COUNT(transaction_id)  AS num_transactions
+FROM workspace.dbo.coffee
+GROUP BY spend
+ORDER BY spend DESC
+LIMIT 20;
+
+--What are the cheapest transactions and how common are they?
+SELECT 
+    (transaction_qty * unit_price) AS spend,
+    COUNT(transaction_id)  AS num_transactions
+FROM workspace.dbo.coffee
+GROUP BY spend
+ORDER BY spend ASC
+LIMIT 20;
+
+/*
+classify transactions as High or Low based on whether 
+they were above or below the average spend of $4.69"
+*/
+SELECT 
+(transaction_qty * unit_price) AS spend,
+CASE
+    WHEN (transaction_qty * unit_price) >= 20   THEN 'High Spender'
+    WHEN (transaction_qty * unit_price) >= 4.69 THEN 'Mid Spender'
+    ELSE                                             'Low Spender'
+END AS spend_category
+FROM workspace.dbo.coffee;
+
+--Classify the days
+SELECT 
+dayname(transaction_date) AS day_name,
+CASE
+    WHEN day_name IN('Sun', 'Sat') THEN 'Weekend'
+    ELSE   'Weekday'
+END AS day_type
+FROM workspace.dbo.coffee;
+
 --========================================Summarise the data and create one table ==============================================
+
 SELECT 
 
     -- === PRODUCT INFO ===
@@ -231,6 +294,12 @@ SELECT
     ELSE 'off_peak'
     END AS time_of_day,
 
+    CASE
+    WHEN day_name IN('Sun', 'Sat') THEN 'Weekend'
+    ELSE   'Weekday'
+    END AS day_type,
+   
+
     -- === STORE INFO ===
     store_location,
 
@@ -243,10 +312,10 @@ SELECT
 
     -- === PERFORMANCE LABELS ===
     CASE
-        WHEN SUM(transaction_qty * unit_price) >= 50000 THEN 'Top Seller'
-        WHEN SUM(transaction_qty * unit_price) >= 20000 THEN 'Mid Seller'
-        ELSE 'Low Seller'
-    END  AS performance_category
+    WHEN (transaction_qty * unit_price) >= 20   THEN 'High Spender'
+    WHEN (transaction_qty * unit_price) >= 4.69 THEN 'Mid Spender'
+    ELSE     'Low Spender'
+    END AS spend_category
 
 FROM workspace.dbo.coffee
 GROUP BY
@@ -256,6 +325,10 @@ GROUP BY
     MONTHNAME(transaction_date),
     MONTH(transaction_date),
     DAYNAME(transaction_date),
+    CASE
+    WHEN DAYNAME(transaction_date) IN('Sun', 'Sat') THEN 'Weekend'
+    ELSE   'Weekday'
+    END,
     DAYOFWEEK(transaction_date),
     HOUR(transaction_time),
     CASE
@@ -264,5 +337,11 @@ GROUP BY
         WHEN HOUR(transaction_time) BETWEEN 17 AND 20 THEN 'Evening'
         ELSE 'Off Peak'
     END,
+    CASE
+    WHEN (transaction_qty * unit_price) >= 20   THEN 'High Spender'
+    WHEN (transaction_qty * unit_price) >= 4.69 THEN 'Mid Spender'
+    ELSE    'Low Spender'
+    END,
     store_location
-ORDER BY total_revenue DESC;
+ORDER BY total_revenue DESC
+LIMIT 200000;
