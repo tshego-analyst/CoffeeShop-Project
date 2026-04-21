@@ -74,7 +74,7 @@ The following transformations were applied in Databricks SQL:
 2. Extracted `month` and `month_name`
 3. Extracted `day_of_week`
 4. Created `time_of_day` buckets
-5. Extracted `day type
+5. Extracted `day type`
 6. Extracted `Spending categories`
 
 ---
