@@ -70,48 +70,13 @@ Before cleaning, the following checks were performed:
 ## Data Transformation
 The following transformations were applied in Databricks SQL:
 
-**1. Created `total_revenue`**
-```sql
-ROUND(SUM(transaction_qty * unit_price), 2) AS total_revenue,
-```
+1. Created `total_revenue`
+2. Extracted `month` and `month_name`
+3. Extracted `day_of_week`
+4. Created `time_of_day` buckets
+5. Extracted `day type
+6. Extracted `Spending categories`
 
-**2. Extracted `month` and `month_name`**
-```sql
- MONTHNAME(transaction_date)             AS month_name,
- MONTH(transaction_date)                 AS month_number,
-```
-
-**3. Extracted `day_of_week`**
-```sql
-DAYNAME(transaction_date)   AS day_name,
-```
-
-**4. Created `time_of_day` buckets**
-```sql
- HOUR(transaction_time)                  AS hour_of_day,
-    CASE 
-    WHEN  hour_of_day BETWEEN 6 AND 11 THEN 'MORNING'
-    WHEN  hour_of_day BETWEEN 12 AND 16 THEN 'AFTERNOON'
-    WHEN  hour_of_day BETWEEN 17 AND 20 THEN 'EVENING'
-    ELSE 'off_peak'
-    END AS time_of_day,
-```
-**5. Extracted `day type`**
-```sql
-CASE
-    WHEN day_name IN('Sun', 'Sat') THEN 'Weekend'
-    ELSE   'Weekday'
-    END AS day_type,
-```
-
-**6. Extracted `Spending categories`**
-```sql
-CASE
-    WHEN (transaction_qty * unit_price) >= 20   THEN 'High Spender'
-    WHEN (transaction_qty * unit_price) >= 4.69 THEN 'Mid Spender'
-    ELSE                                             'Low Spender'
-END AS spend_category
-```
 ---
 
 ## Key Findings
